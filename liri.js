@@ -71,3 +71,15 @@ function getMovie() {
         }
     });
 };
+
+
+// do what it says
+// somehow import text from random.txt
+// splice or slice or something at comma
+// use before as command, after as request
+
+
+//bonus
+// create log.txt
+// append each command 
+// append each result of data
