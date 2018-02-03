@@ -2,7 +2,7 @@
 require("dotenv").config();
 var keys = require("./keys.js");
 
-// Save user input as the command and optional request term
+// Save user input as command and request term (optional)
 var userCommand = process.argv[2];
 var userRequest = process.argv.slice(3).join(" ");
 
@@ -14,16 +14,25 @@ var clientTwitter = new Twitter(keys.twitter);
 var Spotify = require('node-spotify-api');
 var clientSpotify = new Spotify(keys.spotify);
 
+// Import the request package for omdb
+var request = require("request");
+
 // Possible command cases
 switch(userCommand) {
     case "my-tweets":
         getTweets();
     break;
     case "spotify-this-song":
+        if (userRequest === "") {
+            userRequest = "The Sign Ace of Base";
+        };
         getSong();
     break;
     case "movie-this":
-    
+        if (userRequest === "") {
+            userRequest = "Mr Nobody";
+        };
+        getMovie();
     break;
     case "do-what-it-says":
     
@@ -46,9 +55,19 @@ function getTweets() {
 function getSong() {
     clientSpotify.search({type: 'track', query: userRequest, limit: 1}, function(error, data) {
         if (!error) {
-            var main = data.tracks.items[0];
+            var mainInfo = data.tracks.items[0];
+            
+            console.log("Artist: " + mainInfo.album.artists[0].name + "\nSong Name: " + mainInfo.name + "\nAlbum: " + mainInfo.album.name + "\nLink: " + mainInfo.external_urls.spotify);
+        };
+    });     
+};
 
-            console.log("Artist: " + main.album.artists[0].name + "\nSong Name: " + main.name + "\nAlbum: " + main.album.name + "\nLink: " + main.external_urls.spotify);
+// Search by movie name and return title, year, imdb rating, RT rating, country, language, plot, and actors
+function getMovie() {
+    request("http://www.omdbapi.com/?t=" + userRequest +"&y=&plot=short&apikey=trilogy", function (error, response, body) {
+        if (!error && response.statusCode === 200) {
+            var mainInfo = JSON.parse(body);
+            console.log("Title: " + mainInfo.Title + "\nYear: " + mainInfo.Year + "\nIMDB Rating: " + mainInfo.imdbRating + "\nRotten Tomatoes Rating: " + mainInfo.Ratings[1].Value + "\nCountry Produced: " + mainInfo.Country + "\nLanguage: " + mainInfo.Language + "\nPlot: " + mainInfo.Plot + "\nActors: " + mainInfo.Actors);
         }
-    })     
-}
+    });
+};
