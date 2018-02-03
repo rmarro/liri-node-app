@@ -4,14 +4,15 @@ var keys = require("./keys.js");
 
 // Save user input as the command and optional request term
 var userCommand = process.argv[2];
-var userRequest = process.argv[3];
+var userRequest = process.argv.slice(3).join(" ");
 
-// Set up Twitter client
+// import the twitter package and set up client
 var Twitter = require('twitter');
-var client = new Twitter(keys.twitter);
+var clientTwitter = new Twitter(keys.twitter);
 
-// Set up Spotify 
-// var spotify = keys.spotify;
+// Import the Spotify package and set up client 
+var Spotify = require('node-spotify-api');
+var clientSpotify = new Spotify(keys.spotify);
 
 // Possible command cases
 switch(userCommand) {
@@ -19,7 +20,7 @@ switch(userCommand) {
         getTweets();
     break;
     case "spotify-this-song":
-    
+        getSong();
     break;
     case "movie-this":
     
@@ -30,11 +31,24 @@ switch(userCommand) {
 };
 
 
-// Get tweets (TO DO: add count limit and log all of array not just tweets[0])
+// Get 20 most recent tweets and console.log timestamp with text
 function getTweets() {
-    client.get('statuses/user_timeline', {screen_name: "liri_app"}, function (error, tweets, response) {
+    clientTwitter.get('statuses/user_timeline', {screen_name: "liri_app", count: 20}, function (error, tweets, response) {
         if (!error) {
-            console.log(tweets[0].created_at + ": " + tweets[0].text)
-        }
+            for (i = 0; i < tweets.length; i++) {
+                console.log(tweets[i].created_at + ": " + tweets[i].text);
+            };
+        };
     });
+};
+
+// Search by song name and return artist, song, album, and link
+function getSong() {
+    clientSpotify.search({type: 'track', query: userRequest, limit: 1}, function(error, data) {
+        if (!error) {
+            var main = data.tracks.items[0];
+
+            console.log("Artist: " + main.album.artists[0].name + "\nSong Name: " + main.name + "\nAlbum: " + main.album.name + "\nLink: " + main.external_urls.spotify);
+        }
+    })     
 }
