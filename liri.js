@@ -6,23 +6,16 @@ var keys = require("./keys.js");
 var userCommand = process.argv[2];
 var userRequest = process.argv.slice(3).join(" ");
 
-// import the twitter package and set up client
+// import the twitter, spotify, request, and fs packages; add keys
 var Twitter = require('twitter');
 var clientTwitter = new Twitter(keys.twitter);
-
-// Import the Spotify package and set up client 
 var Spotify = require('node-spotify-api');
 var clientSpotify = new Spotify(keys.spotify);
-
-// Import the request package for omdb
 var request = require("request");
-
-// Import fs package for reading and writing files
 var fs = require("fs");
 
 // Possible command cases
 function heyLiri() {
-    logRequest();
     switch(userCommand) {
         case "my-tweets":
             getTweets();
@@ -47,7 +40,6 @@ function heyLiri() {
 
 heyLiri();
 
-
 // Get 20 most recent tweets and console.log timestamp with text
 function getTweets() {
     clientTwitter.get('statuses/user_timeline', {screen_name: "liri_app", count: 20}, function (error, tweets, response) {
@@ -56,11 +48,10 @@ function getTweets() {
         };
         var response = [];
         for (i = 0; i < tweets.length; i++) {
-            console.log(tweets[i].created_at + ": " + tweets[i].text);
-            response.push(tweets[i].created_at + ": " + tweets[i].text);
+            console.log(tweets[i].created_at + ": " + tweets[i].text + "\n");
+            response.push(tweets[i].created_at + ": " + tweets[i].text + "\n");
         };
-        // Figure out how to make new lines between tweets
-        logResponse(response);
+        logResponse(response.join(""));
     });
 };
 
@@ -112,18 +103,9 @@ function getRandom() {
     });
 };
 
-// Add the user command to log.txt
-function logRequest() {
-    fs.appendFile("log.txt", `${userCommand}: ${userRequest}`, function(error) {
-        if (error) {
-            console.log("Error: " + error);
-        };
-    });
-};
-
-// Add the response data to log.txt
+// Add the command and response data to log.txt
 function logResponse(response) {
-    fs.appendFile("log.txt", `\n${response}\n------------\n`
+    fs.appendFile("log.txt", `*COMMAND*\n${userCommand}: ${userRequest}\n*RESPONSE*\n${response}\n------------\n`
     , function(error) {
         if (error) {
             console.log("Error: " + error);
