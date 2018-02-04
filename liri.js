@@ -22,6 +22,7 @@ var fs = require("fs");
 
 // Possible command cases
 function heyLiri() {
+    logRequest();
     switch(userCommand) {
         case "my-tweets":
             getTweets();
@@ -53,9 +54,13 @@ function getTweets() {
         if (error) {
             return console.log("Error: " + error);
         };
+        var response = [];
         for (i = 0; i < tweets.length; i++) {
             console.log(tweets[i].created_at + ": " + tweets[i].text);
+            response.push(tweets[i].created_at + ": " + tweets[i].text);
         };
+        // Figure out how to make new lines between tweets
+        logResponse(response);
     });
 };
 
@@ -66,9 +71,12 @@ function getSong() {
             return console.log("Error: " + error);
         };
 
-        var mainInfo = data.tracks.items[0];
+        var mainInfo = data.tracks.items[0]; 
+
+        var response = `Artist: ${mainInfo.album.artists[0].name} \nSong Name: ${mainInfo.name} \nAlbum: ${mainInfo.album.name} \nLink: ${mainInfo.external_urls.spotify}`;
         
-        console.log("Artist: " + mainInfo.album.artists[0].name + "\nSong Name: " + mainInfo.name + "\nAlbum: " + mainInfo.album.name + "\nLink: " + mainInfo.external_urls.spotify);  
+        console.log(response);
+        logResponse(response);
     });     
 };
 
@@ -82,7 +90,9 @@ function getMovie() {
 
             var mainInfo = JSON.parse(body);
 
-            console.log("Title: " + mainInfo.Title + "\nYear: " + mainInfo.Year + "\nIMDB Rating: " + mainInfo.imdbRating + "\nRotten Tomatoes Rating: " + mainInfo.Ratings[1].Value + "\nCountry Produced: " + mainInfo.Country + "\nLanguage: " + mainInfo.Language + "\nPlot: " + mainInfo.Plot + "\nActors: " + mainInfo.Actors);
+            var response = `Title: ${mainInfo.Title} \nYear: ${mainInfo.Year} \nIMDB Rating: ${mainInfo.imdbRating} \nRotten Tomatoes Rating: ${mainInfo.Ratings[1].Value} \nCountry Produced: ${mainInfo.Country} \nLanguage: ${mainInfo.Language} \nPlot: ${mainInfo.Plot} \nActors: ${mainInfo.Actors}`;
+            console.log(response);
+            logResponse(response);
         }
     });
 };
@@ -100,11 +110,23 @@ function getRandom() {
 
         heyLiri();
     });
-}
+};
 
+// Add the user command to log.txt
+function logRequest() {
+    fs.appendFile("log.txt", `${userCommand}: ${userRequest}`, function(error) {
+        if (error) {
+            console.log("Error: " + error);
+        };
+    });
+};
 
-
-//bonus
-// create log.txt
-// append each command 
-// append each result of data
+// Add the response data to log.txt
+function logResponse(response) {
+    fs.appendFile("log.txt", `\n${response}\n------------\n`
+    , function(error) {
+        if (error) {
+            console.log("Error: " + error);
+        };
+    });
+};
